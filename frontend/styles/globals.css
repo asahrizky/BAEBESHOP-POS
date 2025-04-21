@@ -5,10 +5,10 @@
   --foreground: #171717;
 }
 
-/* Smooth transitions */
-.sidebar-transition {
-  transition: transform 0.2s ease-in-out, width 0.2s ease-in-out;
+input::placeholder {
+  color: black;
 }
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

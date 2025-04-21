@@ -1,4 +1,6 @@
 import { FiShoppingBag, FiDollarSign, FiList, FiLogOut } from "react-icons/fi";
+import { useRouter } from "next/router";
+import { logout } from "@/utils/auth";
 
 export default function AdminLayout({
   children,
@@ -6,11 +8,19 @@ export default function AdminLayout({
   activeTab,
   setActiveTab,
 }) {
+  const router = useRouter();
   const tabs = [
     { id: "products", icon: <FiShoppingBag />, label: "Produk" },
     { id: "sales", icon: <FiDollarSign />, label: "Penjualan" },
     { id: "reports", icon: <FiList />, label: "Rekap" },
   ];
+
+  const handleLogout = async () => {
+    const success = await logout();
+    if (success) {
+      router.push("/");
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -41,7 +51,10 @@ export default function AdminLayout({
         </nav>
 
         <div className="p-4 border-t">
-          <button className="flex items-center w-full p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+          <button
+            onClick={handleLogout}
+            className="flex items-center w-full p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+          >
             <FiLogOut />
             <span className="ml-3">Logout</span>
           </button>
