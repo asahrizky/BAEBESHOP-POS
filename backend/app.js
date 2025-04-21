@@ -5,12 +5,24 @@ const routes = require("./routes");
 
 const app = express();
 
+require("dotenv").config();
+const { router: authRouter, authMiddleware } = require("./routes/auth");
+
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// Routes
-app.use("/api", routes);
+// Public routes
+app.use("/api/auth", authRouter);
+app.use("/api/products", require("./routes/products"));
+
+// Protected routes
+app.use("/api", authMiddleware, routes);
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
 
 // Error handling
 app.use((err, req, res, next) => {

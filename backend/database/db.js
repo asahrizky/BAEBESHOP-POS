@@ -1,7 +1,8 @@
 const sqlite3 = require("sqlite3").verbose();
+const path = require("path");
 
 // Koneksi ke database (file akan dibuat otomatis jika tidak ada)
-const db = new sqlite3.Database("./database/ecommerce.db", (err) => {
+const db = new sqlite3.Database(path.join(__dirname, "ecommerce.db"), (err) => {
   if (err) {
     console.error("Error connecting to database:", err);
   } else {
@@ -10,15 +11,28 @@ const db = new sqlite3.Database("./database/ecommerce.db", (err) => {
   }
 });
 
+// Tambahkan method query untuk kompatibilitas
+db.query = function (sql, params = []) {
+  return new Promise((resolve, reject) => {
+    this.all(sql, params, (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
+};
+
 function initializeDatabase() {
   db.serialize(() => {
-    // Buat tabel products jika belum ada
+    // Buat tabel products dengan struktur yang benar
     db.run(`CREATE TABLE IF NOT EXISTS products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
+      description TEXT,
       price REAL NOT NULL,
-      stock INTEGER NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      image_url TEXT,
+      size_prices TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
 
     // Buat tabel sales jika belum ada
@@ -32,14 +46,18 @@ function initializeDatabase() {
       FOREIGN KEY (product_id) REFERENCES products (id)
     )`);
 
-    // Contoh data awal (opsional)
-    db.get("SELECT COUNT(*) as count FROM products", (err, row) => {
-      if (row.count === 0) {
-        db.run(`INSERT INTO products (name, price, stock) VALUES 
-                ('Kaos Polos Putih', 120000, 50),
-                ('Celana Jeans Hitam', 250000, 30)`);
-      }
-    });
+    // Buat tabel users jika belum ada
+    db.run(`CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      phone TEXT,
+      password TEXT NOT NULL,
+      role TEXT DEFAULT 'user',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    console.log("Database initialized successfully");
   });
 }
 

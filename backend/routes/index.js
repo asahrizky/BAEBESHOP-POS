@@ -5,6 +5,11 @@ const router = express.Router();
 const productRoutes = require("./products");
 const salesRoutes = require("./sales");
 
+// Route default
+router.get("/", (req, res) => {
+  res.json({ message: "API is running" });
+});
+
 // Gabungkan routes
 router.use("/products", productRoutes);
 router.use("/sales", salesRoutes);
